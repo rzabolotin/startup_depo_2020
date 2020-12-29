@@ -1,14 +1,14 @@
 import sys
 
 import numpy as np
+from matplotlib import image
+
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import QApplication, QFileDialog
 import pyqtgraph as pg
 import qdarkstyle
-from matplotlib import image
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QFileDialog
 
 from main_logic import MainLogic
-import gaps_detection
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -90,11 +90,13 @@ class MainWindow(QtWidgets.QMainWindow):
         plot_area.getPlotItem().hideAxis('left')
         plot_area.setAspectLocked(True)
         return plot_area
-        
+
     def open_avi(self, checked):
-        file_name1, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть первый AVI файл", filter="AVI (*.avi)",
+        file_name1, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть первый AVI файл",
+                                                    filter="AVI (*.avi)",
                                                     directory="data")
-        file_name2, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть второй AVI файл", filter="AVI (*.avi)",
+        file_name2, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть второй AVI файл",
+                                                    filter="AVI (*.avi)",
                                                     directory="data")
         cadr_count, ok = QtWidgets.QInputDialog.getInt(self, "Defect Detector", "Остановиться после N стыков:")
         if file_name1 and file_name2 and ok:
@@ -121,7 +123,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.gaps_model.clear()
         self.logic.filter()
         for i, (index, row) in enumerate(self.logic.filter_df_gaps.iterrows()):
-            item = QtGui.QStandardItem(f"({row['rail']}) {row['kilometer']} км {row['meter']} м: зазор {row['gap']} мм (кадр {row['cadr']})")
+            item = QtGui.QStandardItem(
+                f"({row['rail']}) {row['kilometer']} км {row['meter']} м: зазор {row['gap']} мм (кадр {row['cadr']})")
             item.setEditable(False)
             self.gaps_model.appendRow(item)
             index = self.gaps_model.indexFromItem(item)
@@ -146,7 +149,6 @@ class MainWindow(QtWidgets.QMainWindow):
         img = np.swapaxes(img, 0, 1)
         img = img[:, ::-1, :]
         image_item.setImage(img)
-
 
     def mouse_clicked(self, evt):
         pnt = evt.scenePos()
@@ -179,8 +181,6 @@ def config_pyqtgraph():
 
 
 if __name__ == "__main__":
-    # config_pyqtgraph()
-    from PyQt5.QtWidgets import QApplication
     QApplication.setAttribute(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet())

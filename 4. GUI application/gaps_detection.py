@@ -1,9 +1,11 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot
-from skimage.filters import sobel, threshold_otsu
 from skimage.color import rgb2gray
+from skimage.filters import sobel, threshold_otsu
+
 import read_km_m
+
 
 # IS_PLOT = True
 IS_PLOT = False
@@ -17,7 +19,7 @@ GAP_LIMIT = 50
 
 
 def image_processing(image):
-    image = image[:, LIMITS[0]:LIMITS[1]]
+    image = image[:, LIMITS[0]: LIMITS[1]]
     gray_image = rgb2gray(image)
     thresh = threshold_otsu(gray_image)
     binary_mask = gray_image > thresh
@@ -95,10 +97,10 @@ def find_next_column(binary_image, row, column, current_border):
                 column = new_column_left
 
     old = gen_old(old_column, column, binary_image, row)
-    if np.sum(old)/len(old) > 0.5:
+    if np.sum(old) / len(old) > 0.5:
         if len(current_border) > 0:
             mean = np.mean(current_border)
-            if abs(mean-column) > abs(mean-old_column):
+            if abs(mean - column) > abs(mean - old_column):
                 column = old_column
     return column
 
@@ -106,18 +108,29 @@ def find_next_column(binary_image, row, column, current_border):
 def gen_old(old_column, column, binary_image, row):
     c1 = min(old_column, column)
     c2 = max(old_column, column)
-    old1 = binary_image[row-1, c1:c2+1]
+    old1 = binary_image[row - 1, c1 : c2 + 1]
     try:
-        old2 = binary_image[row-2, c1:c2+1]
+        old2 = binary_image[row - 2, c1: c2 + 1]
     except:
         old2 = np.copy(old1)
     old = old1 if np.sum(old1) < np.sum(old2) else old2
     return old
 
 
-def plot(image, gray_image, binary_image_intermediate, binary_image, border, delta_border, min_a, max_a, min_index, max_index):
+def plot(
+    image,
+    gray_image,
+    binary_image_intermediate,
+    binary_image,
+    border,
+    delta_border,
+    min_a,
+    max_a,
+    min_index,
+    max_index,
+):
     pyplot.subplot(1, 6, 1)
-    pyplot.imshow(rgb2gray(image[-50: -20, 24: 155]))
+    pyplot.imshow(rgb2gray(image[-50:-20, 24:155]))
     pyplot.subplot(1, 6, 2)
     pyplot.imshow(gray_image)
     pyplot.subplot(1, 6, 3)
@@ -160,20 +173,24 @@ def generate_data(file_name, file_name2, cadr_count):
 
             border = None
             for i in range(2):
-                gray_image, binary_image, binary_image_intermediate = image_processing(image)
+                gray_image, binary_image, binary_image_intermediate = image_processing(
+                    image
+                )
                 if border is not None:
                     middle = int(np.mean(border))
-                    shift_border = min(middle+10, binary_image.shape[1]-1)
+                    shift_border = min(middle + 10, binary_image.shape[1] - 1)
                     binary_image[:, shift_border:] = 1
 
-                    shift_border = min(middle+2, binary_image.shape[1]-1)
+                    shift_border = min(middle + 2, binary_image.shape[1] - 1)
                     binary_image[0, shift_border:] = 1
 
                 start_column = find_first_column(binary_image)
                 row = 0
                 column = start_column
-                border = [column, ]
-                while row < binary_image.shape[0]-1:
+                border = [
+                    column,
+                ]
+                while row < binary_image.shape[0] - 1:
                     row += 1
                     column = find_next_column(binary_image, row, column, border)
                     if column is not None:
@@ -185,19 +202,36 @@ def generate_data(file_name, file_name2, cadr_count):
             delta_border = np.diff(border)
             min_a = np.min(delta_border)
             min_index = np.argmin(delta_border)
-            next_part = delta_border[min_index + 1: min(min_index + GAP_LIMIT, len(delta_border))]
+            next_part = delta_border[
+                min_index + 1: min(min_index + GAP_LIMIT, len(delta_border))
+            ]
             max_a = np.max(next_part)
-            max_index = np.argmax(next_part) + min_index+1
+            max_index = np.argmax(next_part) + min_index + 1
             thresh = max_a - min_a
 
-            if (thresh > THRESH_LIMIT) and (abs(min_a) > THRESH_LIMIT_ONE_SIDE) and (max_a > THRESH_LIMIT_ONE_SIDE) and (max_index > min_index):
+            if (
+                (thresh > THRESH_LIMIT)
+                and (abs(min_a) > THRESH_LIMIT_ONE_SIDE)
+                and (max_a > THRESH_LIMIT_ONE_SIDE)
+                and (max_index > min_index)
+            ):
                 gap = max_index - min_index
                 if gap < GAP_LIMIT:
                     counter_success += 1
                     print(f"{counter_success}; cadr: {counter_all}; gap: {gap}")
                     if IS_PLOT:
-                        plot(image, gray_image, binary_image_intermediate, binary_image, border, delta_border, min_a,
-                             max_a, min_index, max_index)
+                        plot(
+                            image,
+                            gray_image,
+                            binary_image_intermediate,
+                            binary_image,
+                            border,
+                            delta_border,
+                            min_a,
+                            max_a,
+                            min_index,
+                            max_index,
+                        )
                     km, m = read_km_m.get_coordinates_of_frame(image)
 
                     kilometer_list.append(km)
@@ -207,8 +241,12 @@ def generate_data(file_name, file_name2, cadr_count):
                     cadr_list.append(counter_all)
                     duo_image = np.concatenate((image, image2), axis=1)
                     cv2.imwrite(f"data2\\{counter_all}.jpg", duo_image)
-                    cv2.line(duo_image, (0, min_index), (1024 * 2, min_index), (0, 0, 255), 2)
-                    cv2.line(duo_image, (0, max_index), (1024 * 2, max_index), (0, 0, 255), 2)
+                    cv2.line(
+                        duo_image, (0, min_index), (1024 * 2, min_index), (0, 0, 255), 2
+                    )
+                    cv2.line(
+                        duo_image, (0, max_index), (1024 * 2, max_index), (0, 0, 255), 2
+                    )
                     cv2.imwrite(f"data\\{counter_all}.jpg", duo_image)
 
                     if cadr_count != 0:
@@ -227,7 +265,17 @@ def generate_data(file_name, file_name2, cadr_count):
     cap.release()
 
     import pandas as pd
-    df = pd.DataFrame({"rail": "Л", "km": kilometer_list, "m": meter_list, "gap": gap_list, "file_name": file_name_list, "cadr": cadr_list})
+
+    df = pd.DataFrame(
+        {
+            "rail": "Л",
+            "km": kilometer_list,
+            "m": meter_list,
+            "gap": gap_list,
+            "file_name": file_name_list,
+            "cadr": cadr_list,
+        }
+    )
     df.to_csv(f"{file_name}_data.csv", sep=";", index=False, header=False)
     return f"{file_name}_data.csv"
 

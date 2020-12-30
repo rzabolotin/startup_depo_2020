@@ -1,12 +1,11 @@
 import sys
 
 import numpy as np
-from matplotlib import image
-
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QApplication, QFileDialog
 import pyqtgraph as pg
 import qdarkstyle
+from matplotlib import image
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QFileDialog
 
 from main_logic import MainLogic
 
@@ -84,23 +83,32 @@ class MainWindow(QtWidgets.QMainWindow):
         plot_area.setMenuEnabled(False)
         plot_area.scene().sigMouseClicked.connect(self.mouse_clicked)
         plot_area.scene().sigMouseMoved.connect(self.mouse_moved)
-        plot_area.getPlotItem().getAxis('bottom').enableAutoSIPrefix(False)
-        plot_area.getPlotItem().getAxis('left').enableAutoSIPrefix(False)
-        plot_area.getPlotItem().hideAxis('bottom')
-        plot_area.getPlotItem().hideAxis('left')
+        plot_area.getPlotItem().getAxis("bottom").enableAutoSIPrefix(False)
+        plot_area.getPlotItem().getAxis("left").enableAutoSIPrefix(False)
+        plot_area.getPlotItem().hideAxis("bottom")
+        plot_area.getPlotItem().hideAxis("left")
         plot_area.setAspectLocked(True)
         return plot_area
 
     def open_avi(self, checked):
-        file_name1, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть первый AVI файл",
-                                                    filter="AVI (*.avi)",
-                                                    directory="data")
-        file_name2, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть второй AVI файл",
-                                                    filter="AVI (*.avi)",
-                                                    directory="data")
-        cadr_count, ok = QtWidgets.QInputDialog.getInt(self, "Defect Detector", "Остановиться после N стыков:")
+        file_name1, _ = QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Открыть первый AVI файл",
+            filter="AVI (*.avi)",
+            directory="data",
+        )
+        file_name2, _ = QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Открыть второй AVI файл",
+            filter="AVI (*.avi)",
+            directory="data",
+        )
+        cadr_count, ok = QtWidgets.QInputDialog.getInt(
+            self, "Defect Detector", "Остановиться после N стыков:"
+        )
         if file_name1 and file_name2 and ok:
             from splash import Splash
+
             splash = Splash()
             splash.set_message("Поиск")
             csv_file_name = self.logic.open_avi(file_name1, file_name2, cadr_count)
@@ -111,8 +119,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.refresh_gaps_list()
 
     def open_csv(self, checked):
-        file_name, _ = QFileDialog.getOpenFileName(parent=self, caption="Открыть CSV файл", filter="CSV (*.csv)",
-                                                   directory="data")
+        file_name, _ = QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Открыть CSV файл",
+            filter="CSV (*.csv)",
+            directory="data",
+        )
         if file_name:
             if self.logic.open_csv(file_name):
                 self.refresh_gaps_list()
@@ -124,7 +136,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.logic.filter()
         for i, (index, row) in enumerate(self.logic.filter_df_gaps.iterrows()):
             item = QtGui.QStandardItem(
-                f"({row['rail']}) {row['kilometer']} км {row['meter']} м: зазор {row['gap']} мм (кадр {row['cadr']})")
+                f"({row['rail']}) {row['kilometer']} км {row['meter']} м: зазор {row['gap']} мм (кадр {row['cadr']})"
+            )
             item.setEditable(False)
             self.gaps_model.appendRow(item)
             index = self.gaps_model.indexFromItem(item)
@@ -137,14 +150,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.draw_image_nn(num, "file_name", self.image_item_nn)
 
     def draw_image(self, num, file_name_key, image_item):
-        image_file_name = self.logic.folder + "/" + self.logic.filter_df_gaps[file_name_key].values[num]
+        image_file_name = (
+            self.logic.folder
+            + "/"
+            + self.logic.filter_df_gaps[file_name_key].values[num]
+        )
         img = image.imread(image_file_name)
         img = np.swapaxes(img, 0, 1)
         img = img[:, ::-1, :]
         image_item.setImage(img)
 
     def draw_image_nn(self, num, file_name_key, image_item):
-        image_file_name = self.logic.folder + "//data_nn//" + self.logic.filter_df_gaps[file_name_key].values[num]
+        image_file_name = (
+            self.logic.folder
+            + "//data_nn//"
+            + self.logic.filter_df_gaps[file_name_key].values[num]
+        )
         img = image.imread(image_file_name)
         img = np.swapaxes(img, 0, 1)
         img = img[:, ::-1, :]
@@ -176,8 +197,8 @@ class MainWindow(QtWidgets.QMainWindow):
 def config_pyqtgraph():
     pg.setConfigOption("antialias", True)
     pg.setConfigOption("leftButtonPan", True)
-    pg.setConfigOption('background', 'w')
-    pg.setConfigOption('foreground', 'k')
+    pg.setConfigOption("background", "w")
+    pg.setConfigOption("foreground", "k")
 
 
 if __name__ == "__main__":

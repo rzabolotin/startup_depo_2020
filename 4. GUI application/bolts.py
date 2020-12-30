@@ -1,15 +1,16 @@
-from detectron2.data.datasets import register_coco_instances
-
-from detectron2.utils.visualizer import ColorMode, Visualizer
-from detectron2.engine import DefaultPredictor
-import cv2
-import matplotlib.pyplot as plt
-from detectron2.engine import DefaultTrainer
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
 import os
 
-register_coco_instances(f"HackRZHD", {}, f"kyrill\\RZHD_data\\annotations.json", f"kyrill\\RZHD_data\\")
+import cv2
+import matplotlib.pyplot as plt
+from detectron2 import model_zoo
+from detectron2.config import get_cfg
+from detectron2.data.datasets import register_coco_instances
+from detectron2.engine import DefaultPredictor, DefaultTrainer
+from detectron2.utils.visualizer import ColorMode, Visualizer
+
+register_coco_instances(
+    f"HackRZHD", {}, f"kyrill\\RZHD_data\\annotations.json", f"kyrill\\RZHD_data\\"
+)
 
 
 cfg = get_cfg()
@@ -37,18 +38,13 @@ predictor = DefaultPredictor(cfg)
 
 im = cv2.imread("data2\\86.jpg")
 outputs = predictor(im)
-v = Visualizer(im[:, :, ::-1],
-#                metadata=HackRZHD_metadata,
-               scale=0.8,
-               instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels
+v = Visualizer(
+    im[:, :, ::-1],
+    #                metadata=HackRZHD_metadata,
+    scale=0.8,
+    instance_mode=ColorMode.IMAGE_BW,  # remove the colors of unsegmented pixels
 )
 v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-plt.figure(figsize = (14, 10))
+plt.figure(figsize=(14, 10))
 plt.imshow(cv2.cvtColor(v.get_image()[:, :, ::-1], cv2.COLOR_BGR2RGB))
 plt.show()
-
-
-
-
-
-

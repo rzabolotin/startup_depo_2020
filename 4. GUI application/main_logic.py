@@ -27,10 +27,19 @@ class MainLogic:
             return
         self.csv_file_name = file_name
         self.folder = os.path.dirname(self.csv_file_name)
-        self.df_gaps = pd.read_csv(self.csv_file_name, sep=";",
-                                   names=["rail", "kilometer", "meter", "gap", "file_name", "cadr"],
-                                   dtype={"rail": str, "kilometer": int, "meter": int, "gap": int, "file_name": str,
-                                          "cadr": int})
+        self.df_gaps = pd.read_csv(
+            self.csv_file_name,
+            sep=";",
+            names=["rail", "kilometer", "meter", "gap", "file_name", "cadr"],
+            dtype={
+                "rail": str,
+                "kilometer": int,
+                "meter": int,
+                "gap": int,
+                "file_name": str,
+                "cadr": int,
+            },
+        )
         return True
 
     def filter(self):
@@ -42,8 +51,11 @@ class MainLogic:
             self.filter_df_gaps = self.df_gaps[self.df_gaps["rail"] == "Л"]
         elif self.current_rail == "правая нить":
             self.filter_df_gaps = self.df_gaps[self.df_gaps["rail"] == "П"]
-        self.filter_df_gaps = self.filter_df_gaps[self.filter_df_gaps["gap"] >= self.gap_limit]
+        self.filter_df_gaps = self.filter_df_gaps[
+            self.filter_df_gaps["gap"] >= self.gap_limit
+        ]
 
     def generate_data(self, cadr_count):
         from gaps_detection import generate_data
+
         return generate_data(self.avi_file_name1, self.avi_file_name2, cadr_count)

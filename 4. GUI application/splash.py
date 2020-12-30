@@ -28,6 +28,7 @@ class Splash:
             self.__show_message(is_start_cycle=False)
         except ValueError:
             import logging
+
             logging.error("Splash.set_procent. Процентное значение - не целое число")
 
     def __show_message(self, is_start_cycle):
@@ -37,8 +38,10 @@ class Splash:
             text = "%s..." % self.message
         else:
             text = "%s... %d%%" % (self.message, self.procent)
-        self.splash.showMessage(text, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter, QtCore.Qt.black)
-        if True: #is_start_cycle:
+        self.splash.showMessage(
+            text, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter, QtCore.Qt.black
+        )
+        if True:  # is_start_cycle:
             self.splash.show()
             QtWidgets.qApp.processEvents()
 

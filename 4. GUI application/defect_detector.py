@@ -1,3 +1,4 @@
+import os
 import sys
 
 import numpy as np
@@ -7,6 +8,7 @@ from matplotlib import image
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
+import config
 from main_logic import MainLogic
 
 
@@ -17,7 +19,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.logic = MainLogic()
 
         self.setWindowFlags(QtCore.Qt.Window)
-        self.setWindowTitle("Defect Detector")
+        self.setWindowTitle(config.PROGRAM_NAME)
         self.open_avi_action = QtWidgets.QAction("Open video...")
         self.open_avi_action.triggered.connect(self.open_avi)
         self.open_csv_action = QtWidgets.QAction("Open CSV...")
@@ -95,13 +97,13 @@ class MainWindow(QtWidgets.QMainWindow):
             parent=self,
             caption="Открыть первый AVI файл",
             filter="AVI (*.avi)",
-            directory="data",
+            directory=config.DATA_FOLDER,
         )
         file_name2, _ = QFileDialog.getOpenFileName(
             parent=self,
             caption="Открыть второй AVI файл",
             filter="AVI (*.avi)",
-            directory="data",
+            directory=config.DATA_FOLDER,
         )
         cadr_count, ok = QtWidgets.QInputDialog.getInt(
             self, "Defect Detector", "Остановиться после N стыков:"
@@ -123,7 +125,7 @@ class MainWindow(QtWidgets.QMainWindow):
             parent=self,
             caption="Открыть CSV файл",
             filter="CSV (*.csv)",
-            directory="data",
+            directory=config.DATA_FOLDER,
         )
         if file_name:
             if self.logic.open_csv(file_name):
@@ -150,22 +152,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.draw_image_nn(num, "file_name", self.image_item_nn)
 
     def draw_image(self, num, file_name_key, image_item):
-        image_file_name = (
-            self.logic.folder
-            + "/"
-            + self.logic.filter_df_gaps[file_name_key].values[num]
-        )
+        image_file_name = os.path.join(config.IMAGES_FOLDER,
+                                       self.logic.filter_df_gaps[file_name_key].values[num])
         img = image.imread(image_file_name)
         img = np.swapaxes(img, 0, 1)
         img = img[:, ::-1, :]
         image_item.setImage(img)
 
     def draw_image_nn(self, num, file_name_key, image_item):
-        image_file_name = (
-            self.logic.folder
-            + "//data_nn//"
-            + self.logic.filter_df_gaps[file_name_key].values[num]
-        )
+        image_file_name = os.path.join(config.IMAGES_NN_FOLDER,
+                                       self.logic.filter_df_gaps[file_name_key].values[num])
         img = image.imread(image_file_name)
         img = np.swapaxes(img, 0, 1)
         img = img[:, ::-1, :]

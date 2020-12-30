@@ -2,6 +2,9 @@ import os
 
 import pandas as pd
 
+import config
+import gaps_detection
+
 
 class MainLogic:
     def __init__(self):
@@ -26,7 +29,11 @@ class MainLogic:
         if not os.path.exists(file_name):
             return
         self.csv_file_name = file_name
-        self.folder = os.path.dirname(self.csv_file_name)
+
+        config.DATA_FOLDER = os.path.dirname(self.csv_file_name)
+        config.IMAGES_FOLDER = os.path.join(config.DATA_FOLDER, "images")
+        config.IMAGES_NN_FOLDER = os.path.join(config.DATA_FOLDER, "images_nn")
+
         self.df_gaps = pd.read_csv(
             self.csv_file_name,
             sep=";",
@@ -56,6 +63,4 @@ class MainLogic:
         ]
 
     def generate_data(self, cadr_count):
-        from gaps_detection import generate_data
-
-        return generate_data(self.avi_file_name1, self.avi_file_name2, cadr_count)
+        return gaps_detection.generate_data(self.avi_file_name1, self.avi_file_name2, cadr_count)

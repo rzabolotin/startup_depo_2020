@@ -3,3 +3,4 @@ venv
 .ipynb_checkpoints*
 detectron2-windows
 .idea
+/4. GUI application/data/

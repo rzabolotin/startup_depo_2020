@@ -1,9 +1,14 @@
+import os
+
 import cv2
 import numpy as np
 from matplotlib import pyplot
+import pandas as pd
 from skimage.color import rgb2gray
 from skimage.filters import sobel, threshold_otsu
 
+import bolts
+import config
 import read_km_m
 
 
@@ -239,15 +244,21 @@ def generate_data(file_name, file_name2, cadr_count):
                     gap_list.append(gap)
                     file_name_list.append(f"{counter_all}.jpg")
                     cadr_list.append(counter_all)
+
                     duo_image = np.concatenate((image, image2), axis=1)
-                    cv2.imwrite(f"data2\\{counter_all}.jpg", duo_image)
+
+                    nn_duo_image = bolts.visualize_dl_predictios(duo_image)
+                    cv2.imwrite(os.path.join(config.IMAGES_NN_FOLDER,f"{counter_all}.jpg"), nn_duo_image)
+
                     cv2.line(
                         duo_image, (0, min_index), (1024 * 2, min_index), (0, 0, 255), 2
                     )
                     cv2.line(
                         duo_image, (0, max_index), (1024 * 2, max_index), (0, 0, 255), 2
                     )
-                    cv2.imwrite(f"data\\{counter_all}.jpg", duo_image)
+                    cv2.imwrite(os.path.join(config.IMAGES_FOLDER,f"{counter_all}.jpg"),
+                                duo_image)
+
 
                     if cadr_count != 0:
                         if counter_success >= cadr_count:
@@ -256,15 +267,10 @@ def generate_data(file_name, file_name2, cadr_count):
             else:
                 counter += 1
 
-            # if counter_all in [642, ]:
-            #     plot(image, gray_image, binary_image_intermediate, binary_image, border, delta_border, min_a, max_a,
-            #          min_index, max_index)
         except ValueError:
             counter += 1
             print("ERROR")
     cap.release()
-
-    import pandas as pd
 
     df = pd.DataFrame(
         {
@@ -276,9 +282,8 @@ def generate_data(file_name, file_name2, cadr_count):
             "cadr": cadr_list,
         }
     )
-    df.to_csv(f"{file_name}_data.csv", sep=";", index=False, header=False)
-    return f"{file_name}_data.csv"
 
+    csv_file_name = os.path.join(config.DATA_FOLDER, f"{os.path.basename(file_name)}_data.csv")
+    df.to_csv(csv_file_name, sep=";", index=False, header=False)
 
-if __name__ == "__main__":
-    generate_data("data\\CAM0.avi", "data\\CAM1.avi")
+    return csv_file_name

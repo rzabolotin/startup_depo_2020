@@ -1,8 +1,6 @@
 import cv2
 import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
 
 def get_numbers_from_image(gray_image):
     text_1 = pytesseract.image_to_string(
